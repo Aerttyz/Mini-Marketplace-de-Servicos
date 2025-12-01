@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  PROVIDER
+}
+
+model User {
+  id              String    @id @default(uuid())
+  username        String 
+  password        String
+  email           String    @unique 
+  role            Role      @default(CLIENT)
+  created_at      DateTime  @default(now())
+
+  provider        Provider?
+  appointments    Appointment[]
+
+  refreshTokens           RefreshToken[]
+
+  @@map("users")
+}
+
+model Provider {
+  id              String @id @default(uuid())
+  
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+
+  description     String?
+  city            String?
+
+  services        Service[]
+  appointments    Appointment[]
+  availabilities  Availability[]
+}
+
+model Availability {
+  id              String  @id @default(uuid())
+
+  provider_id     String
+  provider        Provider @relation(fields: [provider_id], references: [id])
+
+  day_of_week     Int
+  start_time      Int
+  end_time        Int
+}
+
+model Service {
+  id                 String    @id @default(uuid())
+  provider_id        String    
+  category_id        String
+
+  name               String
+  description        String
+  photos             String[]
+
+  provider           Provider   @relation(fields: [provider_id], references: [id])
+  category           Category   @relation(fields: [category_id], references: [id])
+
+  variations         ServiceVariation[]
+} 
+
+model ServiceVariation {
+  id                  String    @id @default(uuid())
+  service_id          String
+  service          Service   @relation(fields: [service_id], references: [id])
+
+  name                String
+  price               Decimal   @db.Decimal(10,2)
+  duration_minutes    Int
+
+  appointments        Appointment[]
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Appointment {
+  id           String   @id @default(uuid())
+  
+  client_id    String
+  client       User     @relation(fields: [client_id], references: [id])
+  
+  provider_id  String   
+  provider     Provider @relation(fields: [provider_id], references: [id])
+  
+  variation_id String
+  variation    ServiceVariation @relation(fields: [variation_id], references: [id])
+  
+  start_date   DateTime 
+  end_date     DateTime 
+  
+  status       AppointmentStatus @default(CONFIRMED)
+  
+  created_at   DateTime @default(now())
+
+  @@index([provider_id, start_date, end_date]) 
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+
+  services Service[]
+}
+
+model RefreshToken{
+  id        String  @id @default(uuid())
+  token     String  @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_token")
+}
