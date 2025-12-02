@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { User as UserDecoretor } from 'src/common/decorators/user.decorator';
 import { CreateUserInput } from './dto/create-user-input';
+import { UpdateUserDto } from './dto/update-user-input';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -19,7 +20,7 @@ export class UserController {
     @Put()
     async update(
         @UserDecoretor() user: UserType,
-        @Body() data: CreateUserInput,
+        @Body() data: UpdateUserDto,
     ): Promise<User> {
         return this.userService.update(user.id, data);
     }
