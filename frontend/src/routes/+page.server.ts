@@ -1,7 +1,7 @@
 import { api } from '$lib/api';
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
-export const load: PageLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url }) => {
     const search = url.searchParams.get('search') || '';
     const query = search ? `?search=${search}` : '';
 
