@@ -1,7 +1,7 @@
 <script lang="ts">
   import "./layout.css";
   import { user } from "$lib/api";
-  import NotificationBell from "$lib/components/NotificationBell.svelte"; // <--- Importe aqui
+  import NotificationBell from "$lib/components/NotificationBell.svelte"; 
   
   function logout() {
     user.set(null);
@@ -27,7 +27,7 @@
               <a href="/provider" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition">Painel</a>
             {/if}
             
-            <button on:click={logout} class="text-sm font-medium text-red-500 hover:text-red-700 transition">Sair</button>
+            <button onclick={logout} class="text-sm font-medium text-red-500 hover:text-red-700 transition">Sair</button>
           </div>
         {:else}
           <div class="flex items-center gap-4">

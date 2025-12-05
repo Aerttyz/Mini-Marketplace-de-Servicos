@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 import type { User } from './types';
 
@@ -15,7 +16,7 @@ user.subscribe((value) => {
     }
 });
 
-const API_URL = 'http://localhost:3000';
+const API_URL = browser ? 'http://localhost:3000' : 'http://backend:3000';
 
 export async function api(endpoint: string, method = 'GET', body?: any, token?: string) {
     const headers: HeadersInit = {

@@ -1,36 +1,21 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { api, user } from '$lib/api';
-  import { goto } from '$app/navigation';
+  import type { PageData } from './$types';
+  import type { Appointment } from '$lib/types';
 
-  interface Appointment {
-    id: string;
-    start_date: string;
-    end_date: string;
-    status: string;
-    client: { username: string; email: string };
-    variation: { name: string; price: string; duration_minutes: number };
-  }
+  let { data }: { data: PageData } = $props();
 
-  let appointments: Appointment[] = [];
-  let loading = true;
+  let appointments = $derived<Appointment[]>(data.appointments as Appointment[]);
 
-  onMount(async () => {
-    if (!$user || $user.role !== 'PROVIDER') return goto('/login');
-    try {
-      appointments = await api('/appointments/my-schedule', 'GET', null, $user.access_token);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      loading = false;
-    }
+  $effect(() => {
+    appointments = data.appointments as Appointment[];
   });
 
   function formatDate(isoString: string) {
     const date = new Date(isoString);
     return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
+      hour: '2-digit', minute: '2-digit', timeZone: 'UTC'
     }).format(date);
   }
 
@@ -65,9 +50,7 @@
     </div>
   </div>
 
-  {#if loading}
-    <div class="flex justify-center py-20 text-gray-400 animate-pulse">Carregando agenda...</div>
-  {:else if appointments.length === 0}
+  {#if appointments.length === 0}
     <div class="bg-white p-12 rounded-2xl shadow-sm border border-gray-100 text-center">
       <div class="text-gray-300 text-6xl mb-4">📅</div>
       <h3 class="text-xl font-semibold text-gray-800">Nenhum serviço agendado</h3>
@@ -119,7 +102,7 @@
                 </td>
                 <td class="px-8 py-6 text-right text-sm">
                   {#if app.status !== 'CANCELLED'}
-                    <button on:click={() => cancelAppointment(app.id)} 
+                    <button onclick={() => cancelAppointment(app.id)} 
                             class="text-red-500 hover:text-red-700 font-medium hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
                       Cancelar
                     </button>

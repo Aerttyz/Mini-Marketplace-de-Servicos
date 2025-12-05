@@ -1,7 +1,24 @@
+import { Client } from '@elastic/elasticsearch';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
+const esClient = new Client({
+    node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
+});
+
+async function indexService(service: any) {
+    return esClient.index({
+        index: 'services',
+        document: {
+            id: service.id,
+            name: service.name,
+            description: service.description,
+            categoryId: service.category_id,
+        },
+    });
+}
 
 async function main() {
 
@@ -27,33 +44,33 @@ async function main() {
     const passwordHash = await bcrypt.hash('12345678', 10);
 
     await prisma.user.upsert({
-        where: { email: 'maria.cliente@email.com' },
+        where: { email: 'maria@gmail.com' },
         update: {},
         create: {
             username: 'Maria Cliente',
-            email: 'maria.cliente@email.com',
+            email: 'maria@gmail.com',
             password: passwordHash,
             role: 'CLIENT',
         },
     });
 
     await prisma.user.upsert({
-        where: { email: 'joao.cliente@email.com' },
+        where: { email: 'joao@gmail.com' },
         update: {},
         create: {
             username: 'João Cliente',
-            email: 'joao.cliente@email.com',
+            email: 'joao@gmail.com',
             password: passwordHash,
             role: 'CLIENT',
         },
     });
 
     const anaUser = await prisma.user.upsert({
-        where: { email: 'ana.manicure@email.com' },
+        where: { email: 'ana@gmail.com' },
         update: {},
         create: {
             username: 'Ana Silva Nails',
-            email: 'ana.manicure@email.com',
+            email: 'ana@gmail.com',
             password: passwordHash,
             role: 'PROVIDER',
             provider: {
@@ -69,7 +86,7 @@ async function main() {
     const catManicure = await prisma.category.findUnique({ where: { name: 'Manicure' } });
 
     if (anaUser.provider && catManicure) {
-        await prisma.service.create({
+        const service = await prisma.service.create({
             data: {
                 name: 'Manicure e Pedicure Spa',
                 description: 'Tratamento completo para suas mãos e pés, incluindo esfoliação, hidratação e cutilagem perfeita.',
@@ -89,14 +106,15 @@ async function main() {
                 }
             }
         });
+        await indexService(service);
     }
 
     const carlosUser = await prisma.user.upsert({
-        where: { email: 'carlos.pintor@email.com' },
+        where: { email: 'carlos@gmail.com' },
         update: {},
         create: {
             username: 'Carlos Pinturas',
-            email: 'carlos.pintor@email.com',
+            email: 'carlos@gmail.com',
             password: passwordHash,
             role: 'PROVIDER',
             provider: {
@@ -112,7 +130,7 @@ async function main() {
     const catPintor = await prisma.category.findUnique({ where: { name: 'Pintor' } });
 
     if (carlosUser.provider && catPintor) {
-        await prisma.service.create({
+        const service = await prisma.service.create({
             data: {
                 name: 'Pintura de Interiores',
                 description: 'Renove sua casa com uma pintura profissional. Utilizamos as melhores tintas do mercado.',
@@ -131,14 +149,15 @@ async function main() {
                 }
             }
         });
+        await indexService(service);
     }
 
     const robertoUser = await prisma.user.upsert({
-        where: { email: 'roberto.jardim@email.com' },
+        where: { email: 'roberto@gmail.com' },
         update: {},
         create: {
             username: 'Roberto Jardineiro',
-            email: 'roberto.jardim@email.com',
+            email: 'roberto@gmail.com',
             password: passwordHash,
             role: 'PROVIDER',
             provider: {
@@ -154,7 +173,7 @@ async function main() {
     const catJardineiro = await prisma.category.findUnique({ where: { name: 'Jardineiro' } });
 
     if (robertoUser.provider && catJardineiro) {
-        await prisma.service.create({
+        const service = await prisma.service.create({
             data: {
                 name: 'Manutenção de Jardim',
                 description: 'Corte de grama, poda de árvores e adubação.',
@@ -173,6 +192,7 @@ async function main() {
                 }
             }
         });
+        await indexService(service);
     }
 
 }

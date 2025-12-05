@@ -25,3 +25,24 @@ export interface Variation {
     price: number;
     duration_minutes: number;
 }
+
+export interface Appointment {
+    id: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+    client: { username: string; email: string };
+    variation: { name: string; price: number; duration_minutes: number };
+}
+
+export interface Notification {
+    id: string;
+    message: string;
+    read: boolean;
+    createdAt: string;
+}
+
+export interface TimeSlot {
+    start: string;
+    end: string;
+}

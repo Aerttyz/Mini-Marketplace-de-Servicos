@@ -91,6 +91,10 @@ export class AvailabilityService {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) throw new BadRequestException('Data inválida');
 
+        if (date < new Date(new Date().toDateString())) {
+            throw new BadRequestException('Não é possível buscar horários para datas passadas');
+        }
+
         const dayOfWeek = date.getUTCDay();
 
         const availabilityRules = await this.prisma.availability.findMany({

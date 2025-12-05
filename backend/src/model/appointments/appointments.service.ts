@@ -19,6 +19,11 @@ export class AppointmentsService {
         if (!variation) throw new NotFoundException('Variação de serviço não encontrada');
 
         const start = new Date(dto.startDate);
+
+        if (start < new Date()) {
+            throw new BadRequestException('Não é possível agendar para uma data/hora passada');
+        }
+
         const durationMs = variation.duration_minutes * 60000;
         const end = new Date(start.getTime() + durationMs);
 

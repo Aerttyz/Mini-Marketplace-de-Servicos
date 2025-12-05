@@ -22,11 +22,32 @@ export class SearchService {
         const response = await this.esService.search<ServiceDocument>({
             index: 'services',
             query: {
-                multi_match: {
-                    query: text,
-                    fields: ['name', 'description'],
-                    fuzziness: 'AUTO',
-                },
+                bool: {
+                    should: [
+                        {
+                            multi_match: {
+                                query: text,
+                                fields: ['name', 'description'],
+                                fuzziness: 'AUTO',
+                            }
+                        },
+                        {
+                            wildcard: {
+                                name: {
+                                    value: `*${text.toLowerCase()}*`,
+                                    boost: 2.0
+                                }
+                            }
+                        },
+                        {
+                            prefix: {
+                                name: {
+                                    value: text.toLowerCase(),
+                                }
+                            }
+                        }
+                    ]
+                }
             },
         });
         return response.hits.hits

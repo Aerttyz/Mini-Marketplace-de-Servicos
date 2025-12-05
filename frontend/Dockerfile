@@ -12,5 +12,4 @@ RUN yarn build
 
 EXPOSE 3000
 
-# Inicia o servidor Node.js
 CMD ["node", "build"]

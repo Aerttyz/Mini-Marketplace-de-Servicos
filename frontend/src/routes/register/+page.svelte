@@ -1,19 +1,20 @@
 <script lang="ts">
   import { api } from '$lib/api';
   import { goto } from '$app/navigation';
-  import { slide } from 'svelte/transition'; // Animação suave
+  import { slide } from 'svelte/transition'; 
 
-  let username = '';
-  let email = '';
-  let password = '';
-  let confirmPassword = '';
-  let role = 'CLIENT';
-  let city = '';
-  let description = '';
-  let error = '';
-  let loading = false;
+  let username = $state('');
+  let email = $state('');
+  let password = $state('');
+  let confirmPassword = $state('');
+  let role = $state('CLIENT');
+  let city = $state('');
+  let description = $state('');
+  let error = $state('');
+  let loading = $state(false);
 
-  async function handleRegister() {
+  async function handleRegister(event: Event) {
+    event.preventDefault();
     if (password !== confirmPassword) { error = 'As senhas não coincidem.'; return; }
     loading = true; error = '';
 
@@ -52,10 +53,10 @@
       </div>
     {/if}
     
-    <form class="mt-8 space-y-5" on:submit|preventDefault={handleRegister}>
+    <form class="mt-8 space-y-5" onsubmit={handleRegister}>
       
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Eu sou:</label>
+        <div class="block text-sm font-medium text-gray-700 mb-2">Eu sou:</div>
         <div class="grid grid-cols-2 gap-3">
           <label class="relative cursor-pointer group">
             <input type="radio" bind:group={role} value="CLIENT" class="peer sr-only">

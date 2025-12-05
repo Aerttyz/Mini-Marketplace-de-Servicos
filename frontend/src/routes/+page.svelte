@@ -1,18 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { api } from '$lib/api';
-  import type { Service } from '$lib/types';
+    import { goto } from '$app/navigation';
+    import type { PageData } from './$types';
 
-  let services: Service[] = [];
-  let search = '';
+  let { data }: { data: PageData } = $props();
 
-  async function loadServices() {
-    // Busca serviços (usa o Elasticsearch se search tiver valor)
-    const query = search ? `?search=${search}` : '';
-    services = await api(`/services${query}`);
+  let search = $state('');
+
+  function handleSearch(){
+    goto(`/?search=${search}`)
   }
-
-  onMount(loadServices);
 </script>
 
 <div class="mb-8 flex gap-2">
@@ -21,11 +17,11 @@
     placeholder="Buscar serviço (ex: pintura, manicure)..." 
     class="flex-1 border p-2 rounded"
   />
-  <button on:click={loadServices} class="bg-blue-600 text-white px-6 rounded">Buscar</button>
+  <button onclick={handleSearch} class="bg-blue-600 text-white px-6 rounded">Buscar</button>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-  {#each services as service}
+  {#each data.services as service}
     <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition">
       {#if service.photos.length > 0}
         <img src={service.photos[0]} alt={service.name} class="w-full h-48 object-cover" />
